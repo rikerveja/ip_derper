@@ -1,22 +1,41 @@
+# 第一阶段：构建阶段
 FROM golang:latest AS builder
 
 LABEL org.opencontainers.image.source https://github.com/yangchuansheng/ip_derper
 
 WORKDIR /app
 
-ADD tailscale /app/tailscale
+# 将项目代码添加到容器中
+ADD . /app
 
-# build modified derper
-RUN cd /app/tailscale/cmd/derper && \
-    CGO_ENABLED=0 /usr/local/go/bin/go build -buildvcs=false -ldflags "-s -w" -o /app/derper && \
-    cd /app && \
-    rm -rf /app/tailscale
+# 安装依赖并构建项目
+RUN cd /app/cmd/derper && \
+    go mod tidy && \
+    CGO_ENABLED=0 go build -ldflags="-s -w" -o /app/derper
 
+# 第二阶段：运行阶段
 FROM ubuntu:20.04
+
+# 安装所需的运行时依赖
+RUN apt-get update && apt-get install -y \
+    openssl \
+    curl \
+    bash \
+    node-exporter && \
+    rm -rf /var/lib/apt/lists/*
+
+# 设置工作目录
 WORKDIR /app
 
-# ========= CONFIG =========
-# - derper args
+# 将构建好的 derper 二进制文件从构建阶段复制到最终镜像
+COPY --from=builder /app/derper /app/derper
+
+# 拷贝证书生成脚本和配置文件
+COPY build_cert.sh /app/
+COPY san.conf /app/san.conf
+
+# ========== CONFIG =========
+# 配置环境变量
 ENV DERP_ADDR :443
 ENV DERP_HTTP_PORT 80
 ENV DERP_HOST=127.0.0.1
@@ -25,14 +44,10 @@ ENV DERP_STUN true
 ENV DERP_VERIFY_CLIENTS false
 # ==========================
 
-# apt
-RUN apt-get update && \
-    apt-get install -y openssl curl
+# 暴露服务端口
+EXPOSE 443 80 9100
 
-COPY build_cert.sh /app/
-COPY --from=builder /app/derper /app/derper
-
-# build self-signed certs && start derper
+# 启动 node-exporter 和 derper 服务
 CMD bash /app/build_cert.sh $DERP_HOST $DERP_CERTS /app/san.conf && \
     /app/derper --hostname=$DERP_HOST \
     --certmode=manual \
@@ -40,4 +55,5 @@ CMD bash /app/build_cert.sh $DERP_HOST $DERP_CERTS /app/san.conf && \
     --stun=$DERP_STUN  \
     --a=$DERP_ADDR \
     --http-port=$DERP_HTTP_PORT \
-    --verify-clients=$DERP_VERIFY_CLIENTS
+    --verify-clients=$DERP_VERIFY_CLIENTS & \
+    /usr/local/bin/node_exporter --web.listen-address=":9100"
