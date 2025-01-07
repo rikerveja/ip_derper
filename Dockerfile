@@ -16,13 +16,19 @@ RUN cd /app/cmd/derper && \
 # 第二阶段：运行阶段
 FROM ubuntu:20.04
 
-# 安装所需的运行时依赖
+# 安装基础依赖
 RUN apt-get update && apt-get install -y \
     openssl \
     curl \
-    bash \
-    node-exporter && \
+    bash && \
     rm -rf /var/lib/apt/lists/*
+
+# 尝试通过 apt-get 安装 node-exporter，失败时使用手动安装方式
+RUN apt-get update && apt-get install -y node-exporter || \
+    (echo "apt-get install node-exporter failed, falling back to manual installation" && \
+    curl -LO https://ghproxy.cc/https://github.com/prometheus/node_exporter/releases/download/v1.3.1/node_exporter-1.3.1.linux-amd64.tar.gz && \
+    tar xvfz node_exporter-*.tar.gz && \
+    mv node_exporter-*/node_exporter /usr/local/bin/)
 
 # 设置工作目录
 WORKDIR /app
