@@ -5,18 +5,34 @@ LABEL org.opencontainers.image.source https://github.com/yangchuansheng/ip_derpe
 
 WORKDIR /app
 
-# 将项目代码添加到容器中
-ADD ./cmd/derper /app/cmd/derper
+# 使用 Go 镜像代理来加速模块下载
+ENV GOPROXY=https://goproxy.cn,direct
 
-# 安装依赖并构建项目
-RUN cd /app/cmd/derper && \
-    go mod tidy && \
-    CGO_ENABLED=0 go build -ldflags="-s -w" -o /app/derper
+# 将项目代码添加到容器中
+ADD tailscale /app/tailscale
+
+# 编译修改后的 derper
+RUN cd /app/tailscale/cmd/derper && \
+    CGO_ENABLED=0 /usr/local/go/bin/go build -buildvcs=false -ldflags "-s -w" -o /app/derper && \
+    cd /app && \
+    rm -rf /app/tailscale
 
 # 第二阶段：运行阶段
 FROM ubuntu:20.04
 
-# 安装基础依赖
+WORKDIR /app
+
+# ========== CONFIG =========
+# 配置环境变量
+ENV DERP_ADDR :443
+ENV DERP_HTTP_PORT 80
+ENV DERP_HOST=127.0.0.1
+ENV DERP_CERTS=/app/certs/
+ENV DERP_STUN true
+ENV DERP_VERIFY_CLIENTS false
+# ==========================
+
+# 安装基本依赖和 curl
 RUN apt-get update && apt-get install -y \
     openssl \
     curl \
@@ -30,25 +46,9 @@ RUN apt-get update && apt-get install -y node-exporter || \
     tar xvfz node_exporter-*.tar.gz && \
     mv node_exporter-*/node_exporter /usr/local/bin/)
 
-# 设置工作目录
-WORKDIR /app
-
-# 将构建好的 derper 二进制文件从构建阶段复制到最终镜像
-COPY --from=builder /app/derper /app/derper
-
 # 拷贝证书生成脚本和配置文件
 COPY build_cert.sh /app/
-COPY san.conf /app/san.conf
-
-# ========== CONFIG =========
-# 配置环境变量
-ENV DERP_ADDR :443
-ENV DERP_HTTP_PORT 80
-ENV DERP_HOST=127.0.0.1
-ENV DERP_CERTS=/app/certs/
-ENV DERP_STUN true
-ENV DERP_VERIFY_CLIENTS false
-# ==========================
+COPY --from=builder /app/derper /app/derper
 
 # 暴露服务端口
 EXPOSE 443 80 9100
