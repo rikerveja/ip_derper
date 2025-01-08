@@ -88,7 +88,22 @@ sudo usermod -aG docker $USER
 ```bash
 newgrp docker
 ```
+配置 Docker Daemon
+Linux
+Windows
+macOS
+1. 编辑 /etc/docker/daemon.json 文件：
 
+
+{
+  "registry-mirrors": [
+    "https://docker.imgdb.de"
+  ]
+}
+2. 重启 Docker 服务：
+
+
+sudo systemctl restart docker
 ### **步骤 2：下载 `zhangjiayuan1983/ip_derper` 镜像**
 
 #### 2.1. **拉取镜像**
