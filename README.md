@@ -1,5 +1,14 @@
 全自动封装在了install_derper.sh
 
+
+chmod +x install_derper.sh
+
+./install_derper.sh
+
+
+
+
+
 好的！下面我将一步步指导您从 **安装 Docker CE** 开始，直到 **使用 `docker run` 启动 `derper` 服务**。
 
 ### **步骤 1：安装 Docker CE（Community Edition）**
