@@ -6,7 +6,7 @@ LABEL org.opencontainers.image.source https://github.com/yangchuansheng/ip_derpe
 WORKDIR /app
 
 # 将项目代码添加到容器中
-ADD . /app
+ADD ./cmd/derper /app/cmd/derper
 
 # 安装依赖并构建项目
 RUN cd /app/cmd/derper && \
