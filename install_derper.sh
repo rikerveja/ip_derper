@@ -16,7 +16,7 @@ sudo apt-get install -y apt-transport-https ca-certificates curl software-proper
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
 # 添加 Docker 仓库
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list
 
 # 更新 apt 包索引
 sudo apt-get update
@@ -29,7 +29,7 @@ sudo systemctl start docker
 sudo systemctl enable docker
 
 # 确保 Docker 正常运行
-sudo systemctl status docker
+sudo systemctl status docker | grep "active (running)"
 
 # 2. 配置 Docker 镜像加速器
 echo "配置 Docker 镜像加速器..."
