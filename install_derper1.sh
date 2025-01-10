@@ -102,6 +102,13 @@ CONTAINER_NAME=$(generate_container_name)
 # 6. 启动 Docker 容器并映射端口
 echo "启动 Docker 容器..."
 
+# 检查容器是否已存在，如果存在则删除
+if docker ps -a --filter "name=$CONTAINER_NAME" --format "{{.Names}}"; then
+  echo "容器 $CONTAINER_NAME 已存在，正在删除..."
+  docker rm -f $CONTAINER_NAME  # 删除已存在的容器
+fi
+
+# 启动容器
 docker run -d \
   --name $CONTAINER_NAME \
   --restart always \
