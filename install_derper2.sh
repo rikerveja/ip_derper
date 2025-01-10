@@ -80,7 +80,7 @@ PORTS=($(generate_random_ports))
 # 生成并显示端口
 echo "随机生成的端口："
 for i in {0..1}; do
-  echo "容器 $((i+1)) - HTTPS 端口：${PORTS[$((i*3))]}, STUN 端口：${PORTS[$((i*3+1))]}, Prometheus 监控端口：${PORTS[$((i*3+2))]}"
+  echo "容器 $((i+1)) - HTTPS 端口：${PORTS[$i]}, STUN 端口：${PORTS[$((i+1))]}, Prometheus 监控端口：${PORTS[$((i+2))]}"
 done
 
 # 5. 获取公网 IP 地址并格式化命名
@@ -109,6 +109,14 @@ for i in {1..2}; do
   STUN_PORT_VAR="PORTS[$((i*3+1))]"
   MONITOR_PORT_VAR="PORTS[$((i*3+2))]"
 
+  # 检查容器是否已经存在
+  EXISTING_CONTAINER=$(docker ps -a --filter "name=${!CONTAINER_NAME_VAR}" --format "{{.Names}}")
+  if [ "$EXISTING_CONTAINER" ]; then
+    echo "容器 ${!CONTAINER_NAME_VAR} 已存在，正在移除..."
+    docker rm -f ${!CONTAINER_NAME_VAR}  # 强制删除已存在的容器
+  fi
+
+  # 启动容器
   docker run -d \
     --name ${!CONTAINER_NAME_VAR} \
     --restart always \
