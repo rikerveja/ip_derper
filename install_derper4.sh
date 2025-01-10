@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 # 1. 安装 Docker CE（Community Edition）
 echo "开始安装 Docker..."
@@ -111,6 +111,14 @@ for i in {0..3}; do
   STUN_PORT_VAR="PORTS[$((i*3+1))]"
   MONITOR_PORT_VAR="PORTS[$((i*3+2))]"
 
+  # 检查容器是否已经存在
+  EXISTING_CONTAINER=$(docker ps -a --filter "name=${!CONTAINER_NAME_VAR}" --format "{{.Names}}")
+  if [ "$EXISTING_CONTAINER" ]; then
+    echo "容器 ${!CONTAINER_NAME_VAR} 已存在，正在移除..."
+    docker rm -f ${!CONTAINER_NAME_VAR}  # 强制删除已存在的容器
+  fi
+
+  # 启动容器
   docker run -d \
     --name ${!CONTAINER_NAME_VAR} \
     --restart always \
