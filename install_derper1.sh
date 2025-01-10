@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 # 1. 安装 Docker CE（Community Edition）
 echo "开始安装 Docker..."
@@ -103,31 +103,40 @@ echo "HTTPS 端口：$HTTPS_PORT"
 echo "STUN 端口：$STUN_PORT"
 echo "Prometheus 监控端口：$MONITOR_PORT"
 
-# 5. 启动 Docker 容器并映射端口
+# 5. 获取公网 IP 地址并格式化命名
+SERVER_IP=$(curl -s http://checkip.amazonaws.com)  # 获取公网 IP
+FORMATTED_IP=$(echo $SERVER_IP | tr '.' '_')      # 将点转换为下划线
+
+# 获取容器编号，并生成唯一名称
+CONTAINER_NAME="${FORMATTED_IP}_derper$(cat /tmp/derper_counter 2>/dev/null || echo 1)"  # 从文件读取编号，默认从1开始
+NEW_COUNTER=$(( $(cat /tmp/derper_counter 2>/dev/null || echo 1) + 1 ))  # 自增编号
+echo $NEW_COUNTER > /tmp/derper_counter  # 更新编号
+
+# 6. 启动 Docker 容器并映射端口
 echo "启动 Docker 容器..."
 
 docker run -d \
-  --name derper \
+  --name $CONTAINER_NAME \
   --restart always \
   -p $HTTPS_PORT:443 \
   -p $STUN_PORT:3478/udp \
   -p $MONITOR_PORT:9100 \
   zhangjiayuan1983/ip_derper:latest
 
-# 6. 检查容器状态
+# 7. 检查容器状态
 echo "检查容器状态..."
 
 docker ps
 
-# 7. 查看容器日志
+# 8. 查看容器日志
 echo "查看容器日志..."
 
-docker logs derper
+docker logs $CONTAINER_NAME
 
 # 提示用户访问服务
 echo "容器已启动！您可以通过以下方式访问服务："
-echo "HTTPS 服务： https://<your-server-ip>:$HTTPS_PORT"
-echo "STUN 服务： stun://<your-server-ip>:$STUN_PORT"
-echo "Prometheus 监控： http://<your-server-ip>:$MONITOR_PORT"
+echo "HTTPS 服务： https://$SERVER_IP:$HTTPS_PORT"
+echo "STUN 服务： stun://$SERVER_IP:$STUN_PORT"
+echo "Prometheus 监控： http://$SERVER_IP:$MONITOR_PORT"
 
 echo "安装和配置完成！"
