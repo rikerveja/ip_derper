@@ -69,7 +69,7 @@ check_port_in_use() {
   return $?
 }
 
-# 生成并检查端口是否被占用，直到找到可用端口
+# 生成并检查端口 1
 HTTPS_PORT_1=0
 STUN_PORT_1=0
 MONITOR_PORT_1=0
@@ -192,11 +192,43 @@ echo "容器 2 - HTTPS 端口：$HTTPS_PORT_2, STUN 端口：$STUN_PORT_2, Prome
 echo "容器 3 - HTTPS 端口：$HTTPS_PORT_3, STUN 端口：$STUN_PORT_3, Prometheus 监控端口：$MONITOR_PORT_3"
 echo "容器 4 - HTTPS 端口：$HTTPS_PORT_4, STUN 端口：$STUN_PORT_4, Prometheus 监控端口：$MONITOR_PORT_4"
 
-# 5. 启动 4 个 Docker 容器并映射端口
+# 5. 获取公网 IP 地址并格式化命名
+SERVER_IP=$(curl -s http://checkip.amazonaws.com)  # 获取公网 IP
+FORMATTED_IP=$(echo $SERVER_IP | tr '.' '_')      # 将点转换为下划线
+
+# 获取容器编号，并生成唯一名称
+CONTAINER_ID_1=$(cat /tmp/derper_counter_1 2>/dev/null || echo 1)  # 从文件读取编号，默认从1开始
+NEW_COUNTER_1=$((CONTAINER_ID_1 + 1))  # 自增编号
+echo $NEW_COUNTER_1 > /tmp/derper_counter_1  # 更新编号
+
+CONTAINER_NAME_1="${FORMATTED_IP}_derper$CONTAINER_ID_1"  # 生成容器名称
+
+# 获取第二个容器的编号，并生成唯一名称
+CONTAINER_ID_2=$(cat /tmp/derper_counter_2 2>/dev/null || echo 1)  # 从文件读取编号，默认从1开始
+NEW_COUNTER_2=$((CONTAINER_ID_2 + 1))  # 自增编号
+echo $NEW_COUNTER_2 > /tmp/derper_counter_2  # 更新编号
+
+CONTAINER_NAME_2="${FORMATTED_IP}_derper$CONTAINER_ID_2"  # 生成第二个容器名称
+
+# 获取第三个容器的编号，并生成唯一名称
+CONTAINER_ID_3=$(cat /tmp/derper_counter_3 2>/dev/null || echo 1)  # 从文件读取编号，默认从1开始
+NEW_COUNTER_3=$((CONTAINER_ID_3 + 1))  # 自增编号
+echo $NEW_COUNTER_3 > /tmp/derper_counter_3  # 更新编号
+
+CONTAINER_NAME_3="${FORMATTED_IP}_derper$CONTAINER_ID_3"  # 生成第三个容器名称
+
+# 获取第四个容器的编号，并生成唯一名称
+CONTAINER_ID_4=$(cat /tmp/derper_counter_4 2>/dev/null || echo 1)  # 从文件读取编号，默认从1开始
+NEW_COUNTER_4=$((CONTAINER_ID_4 + 1))  # 自增编号
+echo $NEW_COUNTER_4 > /tmp/derper_counter_4  # 更新编号
+
+CONTAINER_NAME_4="${FORMATTED_IP}_derper$CONTAINER_ID_4"  # 生成第四个容器名称
+
+# 6. 启动 4 个 Docker 容器并映射端口
 echo "启动 4 个 Docker 容器..."
 
 docker run -d \
-  --name derper_1 \
+  --name $CONTAINER_NAME_1 \
   --restart always \
   -p $HTTPS_PORT_1:443 \
   -p $STUN_PORT_1:3478/udp \
@@ -204,7 +236,7 @@ docker run -d \
   zhangjiayuan1983/ip_derper:latest
 
 docker run -d \
-  --name derper_2 \
+  --name $CONTAINER_NAME_2 \
   --restart always \
   -p $HTTPS_PORT_2:443 \
   -p $STUN_PORT_2:3478/udp \
@@ -212,7 +244,7 @@ docker run -d \
   zhangjiayuan1983/ip_derper:latest
 
 docker run -d \
-  --name derper_3 \
+  --name $CONTAINER_NAME_3 \
   --restart always \
   -p $HTTPS_PORT_3:443 \
   -p $STUN_PORT_3:3478/udp \
@@ -220,42 +252,42 @@ docker run -d \
   zhangjiayuan1983/ip_derper:latest
 
 docker run -d \
-  --name derper_4 \
+  --name $CONTAINER_NAME_4 \
   --restart always \
   -p $HTTPS_PORT_4:443 \
   -p $STUN_PORT_4:3478/udp \
   -p $MONITOR_PORT_4:9100 \
   zhangjiayuan1983/ip_derper:latest
 
-# 6. 检查容器状态
+# 7. 检查容器状态
 echo "检查容器状态..."
 
 docker ps
 
-# 7. 查看容器日志
+# 8. 查看容器日志
 echo "查看容器日志..."
 
-docker logs derper_1
-docker logs derper_2
-docker logs derper_3
-docker logs derper_4
+docker logs $CONTAINER_NAME_1
+docker logs $CONTAINER_NAME_2
+docker logs $CONTAINER_NAME_3
+docker logs $CONTAINER_NAME_4
 
 # 提示用户访问服务
 echo "4 个容器已启动！您可以通过以下方式访问服务："
-echo "容器 1 - HTTPS 服务： https://<your-server-ip>:$HTTPS_PORT_1"
-echo "容器 1 - STUN 服务： stun://<your-server-ip>:$STUN_PORT_1"
-echo "容器 1 - Prometheus 监控： http://<your-server-ip>:$MONITOR_PORT_1"
+echo "容器 1 - HTTPS 服务： https://$SERVER_IP:$HTTPS_PORT_1"
+echo "容器 1 - STUN 服务： stun://$SERVER_IP:$STUN_PORT_1"
+echo "容器 1 - Prometheus 监控： http://$SERVER_IP:$MONITOR_PORT_1"
 
-echo "容器 2 - HTTPS 服务： https://<your-server-ip>:$HTTPS_PORT_2"
-echo "容器 2 - STUN 服务： stun://<your-server-ip>:$STUN_PORT_2"
-echo "容器 2 - Prometheus 监控： http://<your-server-ip>:$MONITOR_PORT_2"
+echo "容器 2 - HTTPS 服务： https://$SERVER_IP:$HTTPS_PORT_2"
+echo "容器 2 - STUN 服务： stun://$SERVER_IP:$STUN_PORT_2"
+echo "容器 2 - Prometheus 监控： http://$SERVER_IP:$MONITOR_PORT_2"
 
-echo "容器 3 - HTTPS 服务： https://<your-server-ip>:$HTTPS_PORT_3"
-echo "容器 3 - STUN 服务： stun://<your-server-ip>:$STUN_PORT_3"
-echo "容器 3 - Prometheus 监控： http://<your-server-ip>:$MONITOR_PORT_3"
+echo "容器 3 - HTTPS 服务： https://$SERVER_IP:$HTTPS_PORT_3"
+echo "容器 3 - STUN 服务： stun://$SERVER_IP:$STUN_PORT_3"
+echo "容器 3 - Prometheus 监控： http://$SERVER_IP:$MONITOR_PORT_3"
 
-echo "容器 4 - HTTPS 服务： https://<your-server-ip>:$HTTPS_PORT_4"
-echo "容器 4 - STUN 服务： stun://<your-server-ip>:$STUN_PORT_4"
-echo "容器 4 - Prometheus 监控： http://<your-server-ip>:$MONITOR_PORT_4"
+echo "容器 4 - HTTPS 服务： https://$SERVER_IP:$HTTPS_PORT_4"
+echo "容器 4 - STUN 服务： stun://$SERVER_IP:$STUN_PORT_4"
+echo "容器 4 - Prometheus 监控： http://$SERVER_IP:$MONITOR_PORT_4"
 
 echo "安装和配置完成！"
