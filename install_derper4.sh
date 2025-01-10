@@ -80,7 +80,7 @@ PORTS=($(generate_random_ports))
 # 生成并显示端口
 echo "随机生成的端口："
 for i in {0..3}; do
-  echo "容器 $((i+1)) - HTTPS 端口：${PORTS[$((i))]}, STUN 端口：${PORTS[$((i+1))]}, Prometheus 监控端口：${PORTS[$((i+2))]}"
+  echo "容器 $((i+1)) - HTTPS 端口：${PORTS[$i]}, STUN 端口：${PORTS[$((i+1))]}, Prometheus 监控端口：${PORTS[$((i+2))]}"
 done
 
 # 5. 获取公网 IP 地址并格式化命名
@@ -89,7 +89,7 @@ FORMATTED_IP=$(echo $SERVER_IP | tr '.' '_')      # 将点转换为下划线
 
 # 获取容器编号，并生成唯一名称
 generate_container_name() {
-  local container_counter_file="/tmp/derper_counter"
+  local container_counter_file="/tmp/derper_counter_$1"
   local container_id=$(cat $container_counter_file 2>/dev/null || echo 1)
   local new_counter=$((container_id + 1))
   echo $new_counter > $container_counter_file
@@ -97,24 +97,24 @@ generate_container_name() {
 }
 
 # 获取容器名称
-CONTAINER_NAME_1=$(generate_container_name)
-CONTAINER_NAME_2=$(generate_container_name)
-CONTAINER_NAME_3=$(generate_container_name)
-CONTAINER_NAME_4=$(generate_container_name)
+CONTAINER_NAME_1=$(generate_container_name 1)
+CONTAINER_NAME_2=$(generate_container_name 2)
+CONTAINER_NAME_3=$(generate_container_name 3)
+CONTAINER_NAME_4=$(generate_container_name 4)
 
 # 6. 启动 4 个 Docker 容器并映射端口
 echo "启动 4 个 Docker 容器..."
 
-for i in {0..3}; do
-  CONTAINER_NAME_VAR="CONTAINER_NAME_$((i+1))"
-  HTTPS_PORT_VAR="PORTS[$((i))]"
-  STUN_PORT_VAR="PORTS[$((i+1))]"
-  MONITOR_PORT_VAR="PORTS[$((i+2))]"
+for i in {1..4}; do
+  CONTAINER_NAME_VAR="CONTAINER_NAME_$i"
+  HTTPS_PORT_VAR="PORTS[$((i-1))]"
+  STUN_PORT_VAR="PORTS[$((i))]"
+  MONITOR_PORT_VAR="PORTS[$((i+1))]"
 
-  # 检查容器是否已存在
+  # 检查容器是否已经存在
   EXISTING_CONTAINER=$(docker ps -a --filter "name=${!CONTAINER_NAME_VAR}" --format "{{.Names}}")
   if [ "$EXISTING_CONTAINER" ]; then
-    echo "容器 ${!CONTAINER_NAME_VAR} 已存在，正在删除..."
+    echo "容器 ${!CONTAINER_NAME_VAR} 已存在，正在移除..."
     docker rm -f ${!CONTAINER_NAME_VAR}  # 强制删除已存在的容器
   fi
 
@@ -148,9 +148,9 @@ done
 echo "4 个容器已启动！您可以通过以下方式访问服务："
 for i in {1..4}; do
   CONTAINER_NAME_VAR="CONTAINER_NAME_$i"
-  HTTPS_PORT_VAR="PORTS[$((i))]"
-  STUN_PORT_VAR="PORTS[$((i+1))]"
-  MONITOR_PORT_VAR="PORTS[$((i+2))]"
+  HTTPS_PORT_VAR="PORTS[$((i-1))]"
+  STUN_PORT_VAR="PORTS[$((i))]"
+  MONITOR_PORT_VAR="PORTS[$((i+1))]"
 
   echo "容器 $i - HTTPS 服务： https://$SERVER_IP:${!HTTPS_PORT_VAR}"
   echo "容器 $i - STUN 服务： stun://$SERVER_IP:${!STUN_PORT_VAR}"
