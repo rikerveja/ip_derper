@@ -80,7 +80,7 @@ PORTS=($(generate_random_ports))
 # 生成并显示端口
 echo "随机生成的端口："
 for i in {0..3}; do
-  echo "容器 $((i+1)) - HTTPS 端口：${PORTS[$i]}, STUN 端口：${PORTS[$((i+1))]}, Prometheus 监控端口：${PORTS[$((i+2))]}"
+  echo "容器 $((i+1)) - HTTPS 端口：${PORTS[$((i))]}, STUN 端口：${PORTS[$((i+1))]}, Prometheus 监控端口：${PORTS[$((i+2))]}"
 done
 
 # 5. 获取公网 IP 地址并格式化命名
@@ -107,9 +107,9 @@ echo "启动 4 个 Docker 容器..."
 
 for i in {0..3}; do
   CONTAINER_NAME_VAR="CONTAINER_NAME_$((i+1))"
-  HTTPS_PORT_VAR="PORTS[$((i*3))]"
-  STUN_PORT_VAR="PORTS[$((i*3+1))]"
-  MONITOR_PORT_VAR="PORTS[$((i*3+2))]"
+  HTTPS_PORT_VAR="PORTS[$((i))]"
+  STUN_PORT_VAR="PORTS[$((i+1))]"
+  MONITOR_PORT_VAR="PORTS[$((i+2))]"
 
   # 检查容器是否已存在
   EXISTING_CONTAINER=$(docker ps -a --filter "name=${!CONTAINER_NAME_VAR}" --format "{{.Names}}")
@@ -148,9 +148,9 @@ done
 echo "4 个容器已启动！您可以通过以下方式访问服务："
 for i in {1..4}; do
   CONTAINER_NAME_VAR="CONTAINER_NAME_$i"
-  HTTPS_PORT_VAR="PORTS[$((i*3))]"
-  STUN_PORT_VAR="PORTS[$((i*3+1))]"
-  MONITOR_PORT_VAR="PORTS[$((i*3+2))]"
+  HTTPS_PORT_VAR="PORTS[$((i))]"
+  STUN_PORT_VAR="PORTS[$((i+1))]"
+  MONITOR_PORT_VAR="PORTS[$((i+2))]"
 
   echo "容器 $i - HTTPS 服务： https://$SERVER_IP:${!HTTPS_PORT_VAR}"
   echo "容器 $i - STUN 服务： stun://$SERVER_IP:${!STUN_PORT_VAR}"
