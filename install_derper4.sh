@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 # 1. 安装 Docker CE（Community Edition）
 echo "开始安装 Docker..."
@@ -187,48 +187,48 @@ while true; do
 done
 
 echo "随机生成的端口："
-echo "容器 1 - HTTPS 端口：$HTTPS_PORT_1, STUN 端口：$STUN_PORT_1, Prometheus 监控端口：$MONITOR_PORT_1"
-echo "容器 2 - HTTPS 端口：$HTTPS_PORT_2, STUN 端口：$STUN_PORT_2, Prometheus 监控端口：$MONITOR_PORT_2"
-echo "容器 3 - HTTPS 端口：$HTTPS_PORT_3, STUN 端口：$STUN_PORT_3, Prometheus 监控端口：$MONITOR_PORT_3"
-echo "容器 4 - HTTPS 端口：$HTTPS_PORT_4, STUN 端口：$STUN_PORT_4, Prometheus 监控端口：$MONITOR_PORT_4"
+echo "容器 1 - HTTPS 端口：$HTTPS_PORT_1, STUN 端口：$STUN_PORT_1 (UDP), Prometheus 监控端口：$MONITOR_PORT_1"
+echo "容器 2 - HTTPS 端口：$HTTPS_PORT_2, STUN 端口：$STUN_PORT_2 (UDP), Prometheus 监控端口：$MONITOR_PORT_2"
+echo "容器 3 - HTTPS 端口：$HTTPS_PORT_3, STUN 端口：$STUN_PORT_3 (UDP), Prometheus 监控端口：$MONITOR_PORT_3"
+echo "容器 4 - HTTPS 端口：$HTTPS_PORT_4, STUN 端口：$STUN_PORT_4 (UDP), Prometheus 监控端口：$MONITOR_PORT_4"
 
-# 5. 启动 4 个 Docker 容器并映射端口
+# 5. 启动 4 个 Docker 容器，并使用宿主机的端口
 echo "启动 4 个 Docker 容器..."
 
 docker run -d \
   --name derper_1 \
   --restart always \
   --network host \
-  -p $HTTPS_PORT_1:443 \
-  -p $STUN_PORT_1:3478/udp \
-  -p $MONITOR_PORT_1:9100 \
+  -p $HTTPS_PORT_1:$HTTPS_PORT_1 \
+  -p $STUN_PORT_1:$STUN_PORT_1/udp \
+  -p $MONITOR_PORT_1:$MONITOR_PORT_1 \
   zhangjiayuan1983/ip_derper:latest
 
 docker run -d \
   --name derper_2 \
   --restart always \
   --network host \
-  -p $HTTPS_PORT_2:443 \
-  -p $STUN_PORT_2:3478/udp \
-  -p $MONITOR_PORT_2:9100 \
+  -p $HTTPS_PORT_2:$HTTPS_PORT_2 \
+  -p $STUN_PORT_2:$STUN_PORT_2/udp \
+  -p $MONITOR_PORT_2:$MONITOR_PORT_2 \
   zhangjiayuan1983/ip_derper:latest
 
 docker run -d \
   --name derper_3 \
   --restart always \
   --network host \
-  -p $HTTPS_PORT_3:443 \
-  -p $STUN_PORT_3:3478/udp \
-  -p $MONITOR_PORT_3:9100 \
+  -p $HTTPS_PORT_3:$HTTPS_PORT_3 \
+  -p $STUN_PORT_3:$STUN_PORT_3/udp \
+  -p $MONITOR_PORT_3:$MONITOR_PORT_3 \
   zhangjiayuan1983/ip_derper:latest
 
 docker run -d \
   --name derper_4 \
   --restart always \
   --network host \
-  -p $HTTPS_PORT_4:443 \
-  -p $STUN_PORT_4:3478/udp \
-  -p $MONITOR_PORT_4:9100 \
+  -p $HTTPS_PORT_4:$HTTPS_PORT_4 \
+  -p $STUN_PORT_4:$STUN_PORT_4/udp \
+  -p $MONITOR_PORT_4:$MONITOR_PORT_4 \
   zhangjiayuan1983/ip_derper:latest
 
 # 6. 检查容器状态
