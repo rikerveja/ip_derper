@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 # 1. 安装 Docker CE（Community Edition）
 echo "开始安装 Docker..."
@@ -58,7 +58,7 @@ docker images
 # 4. 随机生成端口并检查端口是否被占用
 echo "开始随机生成端口..."
 
-# 随机生成两个端口（从 10000 到 30000 范围内）
+# 随机生成四个端口（从 10000 到 30000 范围内）
 generate_random_port() {
   echo $((RANDOM % 20000 + 10000))
 }
@@ -132,25 +132,25 @@ echo "随机生成的端口："
 echo "容器 1 - HTTPS 端口：$HTTPS_PORT_1, STUN 端口：$STUN_PORT_1, Prometheus 监控端口：$MONITOR_PORT_1"
 echo "容器 2 - HTTPS 端口：$HTTPS_PORT_2, STUN 端口：$STUN_PORT_2, Prometheus 监控端口：$MONITOR_PORT_2"
 
-# 5. 启动 2 个 Docker 容器并映射端口
+# 5. 启动 2 个 Docker 容器，并使用宿主机的端口
 echo "启动 2 个 Docker 容器..."
 
 docker run -d \
   --name derper_1 \
   --restart always \
   --network host \  # 使用 host 网络模式
-  -p $HTTPS_PORT_1:443 \
-  -p $STUN_PORT_1:3478/udp \
-  -p $MONITOR_PORT_1:9100 \
+  -p $HTTPS_PORT_1:$HTTPS_PORT_1 \
+  -p $STUN_PORT_1:$STUN_PORT_1/udp \
+  -p $MONITOR_PORT_1:$MONITOR_PORT_1 \
   zhangjiayuan1983/ip_derper:latest
 
 docker run -d \
   --name derper_2 \
   --restart always \
   --network host \  # 使用 host 网络模式
-  -p $HTTPS_PORT_2:443 \
-  -p $STUN_PORT_2:3478/udp \
-  -p $MONITOR_PORT_2:9100 \
+  -p $HTTPS_PORT_2:$HTTPS_PORT_2 \
+  -p $STUN_PORT_2:$STUN_PORT_2/udp \
+  -p $MONITOR_PORT_2:$MONITOR_PORT_2 \
   zhangjiayuan1983/ip_derper:latest
 
 # 6. 检查容器状态
