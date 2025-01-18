@@ -138,6 +138,7 @@ echo "启动 2 个 Docker 容器..."
 docker run -d \
   --name derper_1 \
   --restart always \
+  --network host \  # 使用 host 网络模式
   -p $HTTPS_PORT_1:443 \
   -p $STUN_PORT_1:3478/udp \
   -p $MONITOR_PORT_1:9100 \
@@ -146,6 +147,7 @@ docker run -d \
 docker run -d \
   --name derper_2 \
   --restart always \
+  --network host \  # 使用 host 网络模式
   -p $HTTPS_PORT_2:443 \
   -p $STUN_PORT_2:3478/udp \
   -p $MONITOR_PORT_2:9100 \
