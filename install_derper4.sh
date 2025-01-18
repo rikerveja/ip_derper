@@ -198,6 +198,7 @@ echo "启动 4 个 Docker 容器..."
 docker run -d \
   --name derper_1 \
   --restart always \
+  --network host \
   -p $HTTPS_PORT_1:443 \
   -p $STUN_PORT_1:3478/udp \
   -p $MONITOR_PORT_1:9100 \
@@ -206,6 +207,7 @@ docker run -d \
 docker run -d \
   --name derper_2 \
   --restart always \
+  --network host \
   -p $HTTPS_PORT_2:443 \
   -p $STUN_PORT_2:3478/udp \
   -p $MONITOR_PORT_2:9100 \
@@ -214,6 +216,7 @@ docker run -d \
 docker run -d \
   --name derper_3 \
   --restart always \
+  --network host \
   -p $HTTPS_PORT_3:443 \
   -p $STUN_PORT_3:3478/udp \
   -p $MONITOR_PORT_3:9100 \
@@ -222,6 +225,7 @@ docker run -d \
 docker run -d \
   --name derper_4 \
   --restart always \
+  --network host \
   -p $HTTPS_PORT_4:443 \
   -p $STUN_PORT_4:3478/udp \
   -p $MONITOR_PORT_4:9100 \
