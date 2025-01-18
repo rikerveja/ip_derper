@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 # 1. 安装 Docker CE（Community Edition）
 echo "开始安装 Docker..."
@@ -103,16 +103,16 @@ echo "HTTPS 端口：$HTTPS_PORT"
 echo "STUN 端口：$STUN_PORT"
 echo "Prometheus 监控端口：$MONITOR_PORT"
 
-# 5. 启动 Docker 容器并映射端口
+# 5. 启动 Docker 容器，并直接使用宿主机端口
 echo "启动 Docker 容器..."
 
 docker run -d \
   --name derper \
   --restart always \
   --network host \  # 使用 host 网络模式
-  -p $HTTPS_PORT:443 \
-  -p $STUN_PORT:3478/udp \
-  -p $MONITOR_PORT:9100 \
+  -p $HTTPS_PORT:$HTTPS_PORT \
+  -p $STUN_PORT:$STUN_PORT/udp \
+  -p $MONITOR_PORT:$MONITOR_PORT \
   zhangjiayuan1983/ip_derper:latest
 
 # 6. 检查容器状态
