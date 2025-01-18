@@ -109,6 +109,7 @@ echo "启动 Docker 容器..."
 docker run -d \
   --name derper \
   --restart always \
+  --network host \  # 使用 host 网络模式
   -p $HTTPS_PORT:443 \
   -p $STUN_PORT:3478/udp \
   -p $MONITOR_PORT:9100 \
