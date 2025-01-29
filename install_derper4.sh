@@ -37,9 +37,13 @@ echo "配置 Docker 镜像加速器..."
 # 编辑 /etc/docker/daemon.json 文件，添加镜像加速器配置
 sudo mkdir -p /etc/docker
 echo '{
-  "registry-mirrors": [
-    "https://docker.imgdb.de"
-  ]
+"registry-mirrors": [
+        "https://docker.1ms.run",
+        "https://docker.xuanyuan.me",
+        "https://docker.rainbond.cc",
+        "https://do.nark.eu.org",
+        "https://dc.j8.work"
+    ]
 }' | sudo tee /etc/docker/daemon.json
 
 # 重启 Docker 服务使配置生效
